@@ -10,21 +10,20 @@ function FeaturedBooks() {
   const [books, setBooks] = useState([]);
 
   // FETCH BOOKS FROM BACKEND
-  useEffect(() => {
-    axios
-      .get(`${BASE_URL}/BookStoreApi/books`)   // 🔥 correct API path
-      .then((res) => {
-        console.log("FeaturedBooks API:", res.data);
-        setBooks(Array.isArray(res.data) ? res.data : []); // 🔥 ensures array
-      })
-      .catch((err) => {
-        console.error(err);
-        Toast.fire({
-          icon: "error",
-          title: "Failed to load books",
-        });
+useEffect(() => {
+  axios
+    .get(`${BASE_URL}/BookStoreAPI/books`)
+    .then((res) => {
+      setBooks(Array.isArray(res.data) ? res.data : []);
+    })
+    .catch(() => {
+      Toast.fire({
+        icon: "error",
+        title: "Failed to load books",
       });
-  }, []);
+    });
+}, [BASE_URL]);
+
 
   // ADD TO CART
   const addToCart = (e, book) => {
@@ -54,7 +53,11 @@ function FeaturedBooks() {
   return (
     <div className="py-12">
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-8">
-
+{books.length === 0 && (
+      <p className="text-center text-gray-400 col-span-full">
+        No books available
+      </p>
+    )}
         {books.map((book) => (
           <div
             key={book._id}  
