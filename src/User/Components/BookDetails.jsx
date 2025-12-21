@@ -12,21 +12,22 @@ export default function BookDetails() {
 
 const BASE_URL = import.meta.env.VITE_BASE_URL;
 
-const [book, setBooks] = useState([]);
+const [book, setBook] = useState(null);
+
 
 useEffect(() => {
-  axios.get(`${BASE_URL}/BookStoreAPI/books/${id}`)
+  axios
+    .get(`${BASE_URL}/BookStoreAPI/books/${id}`)
     .then((res) => {
-      setBooks(res.data);  // data from backend
+      setBook(res.data);
     })
-    .catch((err) => {
-      console.error(err);
+    .catch(() => {
       Toast.fire({
         icon: "error",
         title: "Failed to load books",
       });
     });
-}, []);
+}, [id, BASE_URL]);
 
 
   // const book = books.find((b) => b.id == id);
@@ -45,38 +46,36 @@ useEffect(() => {
 
   // --- CART FUNCTIONALITY ---
 const addToCart = (book) => {
-    // 1. Get existing cart
-    let cart = JSON.parse(localStorage.getItem("cart")) || [];
+  let cart = JSON.parse(localStorage.getItem("cart")) || [];
 
-    // 2. Check if item exists
-    const existingItem = cart.find((item) => item.id === book.id);
+  const existingItem = cart.find((item) => item._id === book._id);
 
-    // --- UPDATED LOGIC START ---
-    if (existingItem) {
-      // If found, show alert and STOP the function
-      Toast.fire({
-        icon: "info",
-        title: "This book is already in your cart",
-      });
-      return; 
-    }
-    // --- UPDATED LOGIC END ---
-
-    // 3. If NOT found, add new item
-    cart.push({ ...book, qty: 1 });
-
-    // 4. Save to storage
-    localStorage.setItem("cart", JSON.stringify(cart));
-
-    // 5. Trigger event so Navbar updates
-    window.dispatchEvent(new Event("storage"));
-
-    // 6. Success Feedback
+  if (existingItem) {
     Toast.fire({
-      icon: "success",
-      title: `${book.title} added to cart!`,
+      icon: "info",
+      title: "This book is already in your cart",
     });
-  };
+    return;
+  }
+
+  cart.push({
+    _id: book._id,
+    title: book.title,
+    author: book.author,
+    price: Number(book.price),
+    category: book.category,
+    qty: qty, // from state
+  });
+
+  localStorage.setItem("cart", JSON.stringify(cart));
+  window.dispatchEvent(new Event("storage"));
+
+  Toast.fire({
+    icon: "success",
+    title: `${book.title} added to cart!`,
+  });
+};
+
 
   // Quantity Handlers
   const increaseQty = () => setQty(qty + 1);
@@ -163,7 +162,7 @@ const addToCart = (book) => {
 
               {/* Add to Cart Button */}
               <button 
-                onClick={addToCart}
+                onClick={() => addToCart(book)}
                 className="flex-1 px-8 py-3 bg-[#D4AF37] text-[#0A0A0A] font-bold text-lg rounded-lg hover:bg-[#F1C40F] shadow-[0_0_20px_rgba(212,175,55,0.4)] hover:shadow-[0_0_30px_rgba(212,175,55,0.6)] transition-all flex items-center justify-center gap-2"
               >
                 <ShoppingCart size={22} /> Add to Cart
