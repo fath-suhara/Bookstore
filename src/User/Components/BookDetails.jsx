@@ -15,7 +15,7 @@ const BASE_URL = import.meta.env.VITE_BASE_URL;
 const [book, setBooks] = useState([]);
 
 useEffect(() => {
-  axios.get(`${BASE_URL}/BookStoreApi/books/${id}`)
+  axios.get(`${BASE_URL}/BookStoreAPI/books/${id}`)
     .then((res) => {
       setBooks(res.data);  // data from backend
     })
