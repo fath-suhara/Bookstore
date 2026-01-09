@@ -2,12 +2,29 @@ import React, { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
 import { ShoppingCart, Eye } from 'lucide-react';
 import { Toast } from '../../utils/SweetAlert';
+import { motion } from 'framer-motion';
 import axios from 'axios';
 
 function FeaturedBooks() {
 
   const BASE_URL = import.meta.env.VITE_BASE_URL;
   const [books, setBooks] = useState([]);
+  const containerVariants = {
+  hidden: {},
+  visible: {
+    transition: { staggerChildren: 0.15 },
+  },
+};
+
+const cardVariants = {
+  hidden: { opacity: 0, y: 40 },
+  visible: {
+    opacity: 1,
+    y: 0,
+    transition: { duration: 0.6, ease: "easeOut" },
+  },
+};
+
 
   // FETCH BOOKS FROM BACKEND
 useEffect(() => {
@@ -52,30 +69,54 @@ useEffect(() => {
 
   return (
     <div className="py-12">
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-8">
+<motion.div
+  variants={containerVariants}
+  initial="hidden"
+  whileInView="visible"
+  viewport={{ once: true }}
+  className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-8"
+>
 {books.length === 0 && (
       <p className="text-center text-gray-400 col-span-full">
         No books available
       </p>
     )}
         {books.map((book) => (
-          <div
-            key={book._id}  
-            className="group relative bg-[#121212] rounded-xl overflow-hidden border border-[#D4AF37]/20 hover:border-[#D4AF37] transition-all duration-300 hover:shadow-[0_0_20px_rgba(212,175,55,0.15)] hover:-translate-y-2 flex flex-col"
-          >
+ <motion.div
+  key={book._id}
+  initial={{ opacity: 0, y: 30 }}
+  whileInView={{ opacity: 1, y: 0 }}
+  viewport={{ once: true }}
+  whileHover={{ y: -6 }}
+  transition={{ type: "spring", stiffness: 120, damping: 18 }}
+  className="group relative bg-[#121212] rounded-xl overflow-hidden
+             border border-[#D4AF37]/20 hover:border-[#D4AF37]
+             transition-colors duration-300
+             hover:shadow-[0_10px_30px_rgba(212,175,55,0.15)]
+             flex flex-col"
+>
+
             
             {/* BOOK COVER */}
-            <Link to={`/books/${book._id}`} className="block h-64 w-full bg-[#1F1F1F] relative flex items-center justify-center">
-              <div className="w-32 h-44 bg-gradient-to-r from-[#D4AF37]/80 to-[#B89628] rounded-r-md shadow-xl flex items-center justify-center">
-                <span className="text-black font-bold text-center px-2 text-xs opacity-70">
-                  {book.title}
-                </span>
-              </div>
+                    <Link
+  to={`/books/${book._id}`}>
+          <div className="h-80 w-full bg-[#1F1F1F] relative overflow-hidden flex items-center justify-center group-hover:bg-[#252525] transition-colors">
+<div className="aspect-[2/3] w-full overflow-hidden rounded-xl bg-neutral-900 flex items-center justify-center">
+  {book.image ? (
+   <img
+    src={`${BASE_URL}/uploads/images/${book.image}`}
+    alt={book.title}
+    className="max-w-full max-h-70 object-cover transition-transform duration-300 group-hover:scale-105"
+  />
 
-              <div className="absolute top-4 right-4 bg-[#D4AF37] text-black text-xs font-bold px-2 py-1 rounded opacity-0 group-hover:opacity-100">
-                {book.category}
-              </div>
-            </Link>
+  ) : (
+    <span className="text-gray-400 text-sm">No Image</span>
+  )}
+</div>
+                </div>
+                </Link>
+                
+
 
             {/* CONTENT */}
             <div className="p-6 flex flex-col flex-1">
@@ -86,11 +127,8 @@ useEffect(() => {
                 <p className="text-sm text-gray-400 mt-1">by {book.author}</p>
               </Link>
 
-              <div className="mt-auto flex items-center justify-between">
-                <p className="text-2xl font-bold text-[#D4AF37]">
-                  ₹{book.price}
-                </p>
-
+              <div className="mt-auto flex justify-end">
+             
                 <div className="flex gap-2">
                   {/* VIEW DETAILS */}
                   <Link
@@ -111,10 +149,10 @@ useEffect(() => {
               </div>
 
             </div>
-          </div>
+          </motion.div>
         ))}
 
-      </div>
+      </motion.div>
     </div>
   );
 }

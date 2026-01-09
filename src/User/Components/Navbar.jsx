@@ -3,7 +3,7 @@ import { Link } from "react-router-dom";
 
 export default function Navbar() {
   return (
-    <header className="bg-[#0A0A0A] shadow-md border-b border-[#D4AF37]">
+    <header className="bg-[#0A0A0A] shadow-md border-b border-[#D4AF37] fixed top-0 left-0 w-full z-50">
       <div className="max-w-7xl mx-auto px-6 lg:px-8 h-20 flex items-center justify-between">
 
         {/* Logo */}
@@ -11,8 +11,8 @@ export default function Navbar() {
         to="/"
         >
         <div className="text-2xl font-serif tracking-wide">
-          <span className="text-[#F9F6EF]">READ</span>
-          <span className="text-[#D4AF37]">STACK</span>
+          <span className="text-[#F9F6EF]">Read</span>
+          <span className="text-[#D4AF37]">Loom</span>
         </div>
         </Link>
 

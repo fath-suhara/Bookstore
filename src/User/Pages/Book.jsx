@@ -10,18 +10,7 @@ export default function Books() {
   const [searchTerm, setSearchTerm] = useState("");
   const [selectedCategory, setSelectedCategory] = useState("All");
 
-  // --- MOCK DATA ---
-  // Updated prices to Numbers for calculation compatibility with Cart
-  // const books = [
-  //   { id: 1, title: "Atomic Habits", author: "James Clear", price: 399, category: "Self Help" },
-  //   { id: 2, title: "The Alchemist", author: "Paulo Coelho", price: 299, category: "Fiction" },
-  //   { id: 3, title: "Deep Work", author: "Cal Newport", price: 450, category: "Productivity" },
-  //   { id: 4, title: "Hooked", author: "Nir Eyal", price: 420, category: "Psychology" },
-  //   { id: 5, title: "Think Again", author: "Adam Grant", price: 380, category: "Mindset" },
-  //   { id: 6, title: "The Design of Everyday Things", author: "Don Norman", price: 599, category: "Design" },
-  //   { id: 7, title: "Rich Dad Poor Dad", author: "Robert Kiyosaki", price: 350, category: "Finance" },
-  //   { id: 8, title: "Sapiens", author: "Yuval Noah Harari", price: 550, category: "History" },
-  // ];
+
 const BASE_URL = import.meta.env.VITE_BASE_URL;
 
 const [books, setBooks] = useState([]);
@@ -47,7 +36,7 @@ useEffect(() => {
     let cart = JSON.parse(localStorage.getItem("cart")) || [];
 
     // 2. Check if item exists
-    const existingItem = cart.find((item) => item.id === book.id);
+const existingItem = cart.find((item) => item._id === book._id);
 
     // --- UPDATED LOGIC START ---
     if (existingItem) {
@@ -61,7 +50,15 @@ useEffect(() => {
     // --- UPDATED LOGIC END ---
 
     // 3. If NOT found, add new item
-    cart.push({ ...book, qty: 1 });
+cart.push({
+  _id: book._id,
+  title: book.title,
+  author: book.author,
+  image: book.image,
+  price: Number(book.price),
+  qty: 1,
+});
+
 
     // 4. Save to storage
     localStorage.setItem("cart", JSON.stringify(cart));
@@ -77,18 +74,30 @@ useEffect(() => {
   };
 
   // --- FILTERING LOGIC ---
-  const categories = ["All", ...new Set(books.map(b => b.category))];
+const categories = ["All"];
 
-  const filteredBooks = books.filter((book) => {
-    const matchesSearch = book.title.toLowerCase().includes(searchTerm.toLowerCase()) || 
-                          book.author.toLowerCase().includes(searchTerm.toLowerCase());
-    const matchesCategory = selectedCategory === "All" || book.category === selectedCategory;
-    
-    return matchesSearch && matchesCategory;
-  });
+
+const filteredBooks = books.filter((book) => {
+  const matchesSearch =
+    book.title.toLowerCase().includes(searchTerm.toLowerCase()) ||
+    book.author.toLowerCase().includes(searchTerm.toLowerCase());
+
+  // if user is typing → search mode
+  if (searchTerm.trim() !== "") {
+    return matchesSearch;
+  }
+
+  // default: show all
+  return selectedCategory === "All";
+});
+
+
+
+
+
 
   return (
-    <div className="min-h-screen bg-[#FFF8E7] text-[#0A0A0A] font-sans">
+    <div className="min-h-screen bg-[#FFF8E7] text-[#0A0A0A] font-sans mt-20">
       
       {/* --- HERO HEADER --- */}
       <div className="bg-[#0A0A0A] py-16 px-6 text-center border-b-4 border-[#D4AF37] relative overflow-hidden">
@@ -113,27 +122,35 @@ useEffect(() => {
               type="text" 
               placeholder="Search by title or author..." 
               value={searchTerm}
-              onChange={(e) => setSearchTerm(e.target.value)}
-              className="w-full bg-white border-2 border-[#D4AF37]/30 text-black pl-12 pr-4 py-3 rounded-full focus:outline-none focus:border-[#D4AF37] focus:ring-2 focus:ring-[#D4AF37]/20 transition-all placeholder-gray-400 shadow-sm"
+  onChange={(e) => {
+    setSearchTerm(e.target.value);
+    if (e.target.value !== "") {
+      setSelectedCategory(""); // disable "All"
+    }
+  }}              className="w-full bg-white border-2 border-[#D4AF37]/30 text-black pl-12 pr-4 py-3 rounded-full focus:outline-none focus:border-[#D4AF37] focus:ring-2 focus:ring-[#D4AF37]/20 transition-all placeholder-gray-400 shadow-sm"
             />
           </div>
 
           {/* Category Tabs */}
-          <div className="flex gap-2 pb-2 md:pb-0 w-full md:w-auto scrollbar-hide">
-            {categories.map((cat) => (
-              <button
-                key={cat}
-                onClick={() => setSelectedCategory(cat)}
-                className={`px-5 py-2 rounded-full text-sm font-semibold whitespace-nowrap transition-all border ${
-                  selectedCategory === cat
-                    ? "bg-[#D4AF37] text-black border-[#D4AF37] shadow-lg shadow-[#D4AF37]/30"
-                    : "bg-transparent text-gray-600 border-gray-300 hover:border-[#D4AF37] hover:text-[#D4AF37]"
-                }`}
-              >
-                {cat}
-              </button>
-            ))}
-          </div>
+          <div className="flex gap-2 pb-2 md:pb-0 w-full md:w-auto">
+  <button
+    onClick={() => {
+      setSelectedCategory("All");
+      setSearchTerm("");
+    }}
+    className={`px-4 py-2 rounded transition 
+      ${
+      selectedCategory === "All" && searchTerm === ""
+        ? "bg-[#D4AF37] text-black"
+        : "bg-[#1f1f1f] text-white hover:bg-[#2a2a2a]"
+    }
+    ${searchTerm !== "" ? "opacity-70" : ""}
+  `}
+  >
+    All
+  </button>
+</div>
+
         </div>
 
         {/* --- BOOKS GRID --- */}
@@ -152,22 +169,24 @@ useEffect(() => {
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-8">
             {filteredBooks.map((book) => (
               <div
-                key={book.id}
+                key={book._id}
                 className="group relative bg-[#121212] rounded-xl overflow-hidden border border-[#D4AF37]/20 hover:border-[#D4AF37] transition-all duration-300 hover:shadow-[0_10px_30px_rgba(212,175,55,0.15)] hover:-translate-y-2 flex flex-col"
               >
                 
                 {/* Book Cover Placeholder */}
-                <div className="h-56 w-full bg-[#1F1F1F] relative overflow-hidden flex items-center justify-center group-hover:bg-[#252525] transition-colors">
-                  <div className="w-28 h-40 bg-gradient-to-br from-[#D4AF37] to-[#8C701B] rounded-r shadow-2xl transform group-hover:scale-105 transition-transform duration-500 flex items-center justify-center relative">
-                    <span className="text-[10px] text-black/70 font-bold px-2 text-center leading-tight">
-                      {book.title}
-                    </span>
-                    <div className="absolute left-1 top-0 bottom-0 w-[2px] bg-black/20"></div>
-                  </div>
-                  
-                  <span className="absolute top-3 right-3 bg-black/60 backdrop-blur-md text-[#D4AF37] text-xs px-2 py-1 rounded border border-[#D4AF37]/30">
-                    {book.category}
-                  </span>
+                <div className="h-80 w-full bg-[#1F1F1F] relative overflow-hidden flex items-center justify-center group-hover:bg-[#252525] transition-colors">
+<div className="aspect-[2/3] w-full overflow-hidden rounded-xl bg-neutral-900 flex items-center justify-center">
+  {book.image ? (
+   <img
+    src={`${BASE_URL}/uploads/images/${book.image}`}
+    alt={book.title}
+    className="max-w-full max-h-70 object-cover transition-transform duration-300 group-hover:scale-105"
+  />
+
+  ) : (
+    <span className="text-gray-400 text-sm">No Image</span>
+  )}
+</div>
                 </div>
 
                 {/* Content */}
@@ -176,11 +195,15 @@ useEffect(() => {
                     <h3 className="text-lg font-bold text-[#F9F6EF] line-clamp-1 group-hover:text-[#D4AF37] transition-colors">
                       {book.title}
                     </h3>
-                    <p className="text-sm text-gray-400 mt-1">by {book.author}</p>
+<p className="text-xs text-gray-500">
+  {book.author} • {book.year}
+</p>
                   </div>
 
                   <div className="mt-auto flex items-center justify-between">
-                    <p className="text-xl font-bold text-[#D4AF37]">₹{book.price}</p>
+<span className="text-[#D4AF37] text-sm font-semibold">
+  ₹{book.price}
+</span>
                     
                     {/* ADD TO CART BUTTON */}
                     <button 

@@ -108,7 +108,11 @@ export default function BookManagement() {
                   <td className="p-4">
                     <div className="flex items-center gap-3">
                       {/* Placeholder Cover */}
-                      <div className="w-10 h-14 bg-slate-600 rounded shadow-sm flex-shrink-0"></div> 
+<img
+  src={`${VITE_BASE_URL}/uploads/images/${b.image}`}
+  alt={b.title}
+  className="w-10 h-14 object-cover rounded shadow-sm"
+/>
                       <div>
                         <div className="font-semibold text-slate-100">{b.title}</div>
                         <div className="text-sm text-slate-400">{b.author}</div>
